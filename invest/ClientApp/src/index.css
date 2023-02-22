@@ -1,0 +1,51 @@
+html {
+    width: 100%;
+}
+
+body {
+    width: 100%;
+}
+
+#root {
+    width: 100%;
+}
+
+.full-width {
+    width: 100vw;
+}
+
+.full-height {
+    height: 100vh;
+}
+
+.side-tab {
+    overflow: hidden;
+}
+
+.fill-width {
+    width: 100%;
+}
+
+.fill-height {
+    height: 100%;
+}
+
+.scroll-container {
+    overflow: scroll;
+}
+
+.scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.radius-lef-zero {
+    border-top-left-radius: 0;
+}
+
+.radius-right-zero {
+    border-top-right-radius: 0;
+}
+
+.item {
+    cursor: pointer;
+}

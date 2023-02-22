@@ -2,12 +2,14 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using invest.Jobs;
 using invest.Model;
+using invest.Steam;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddDbContext<DatabaseContext>(conf => conf.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
@@ -29,12 +31,13 @@ builder.Services.AddHangfire(conf => conf
     })
 );
 
+builder.Services.AddScoped<SteamAuthService>();
+builder.Services.AddHostedService<HangfireJobs>();
+
 builder.Services.AddHangfireServer();
 builder.Services.AddSwaggerGen();
 
 builder.Host.UseSerilog();
-
-builder.Services.AddHostedService<HangfireJobs>();
 
 var app = builder.Build();
 

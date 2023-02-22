@@ -1,33 +1,49 @@
 ﻿using invest.Model;
 using invest.Steam;
 using invest.Steam.Data;
+using System.Globalization;
 
 namespace invest.Jobs
 {
     public class PriceHistoryJob
     {
-        public static async Task Run(Item item)
+        private readonly ILogger<PriceHistoryJob> logger;
+        private readonly DatabaseContext context;
+        private readonly SteamService service;
+        private readonly CultureInfo provider;
+
+        public PriceHistoryJob(ILogger<PriceHistoryJob> logger, DatabaseContext context, IServiceProvider serviceProvider)
         {
-            DatabaseContext context = new DatabaseContext();
-            SteamService service = new SteamService();
-            PriceHistory history = await service.GetPriceHistory(item.Hash);
+            this.logger = logger;
+            this.context = context;
+            service = new SteamService(serviceProvider);
+            provider = CultureInfo.GetCultureInfo("en-US");
+        }
+
+        public void Run(Item i)
+        {
+            Item item = context.Items.FirstOrDefault(q => q.ItemId == i.ItemId);
+            PriceHistory history = service.GetPriceHistory(item.Hash);
             history.Prices.ForEach(price =>
             {
-                if (!context.History.Where(q => q.Date == price.Date && q.Value == price.Value && q.Volume == q.Volume).Any())
+                Point p = new Point()
                 {
-                    History history = new History()
+                    Date = DateTime.ParseExact(price[0].ToString(), "MMM dd yyyy HH: z", provider).ToUniversalTime(),
+                    Value = double.Parse(price[1].ToString(), provider),
+                    Volume = int.Parse(price[2].ToString())
+                };
+
+                if (!context.Points.Any(q => q.Item.ItemId == item.ItemId && q.Date == p.Date && q.Value == p.Value && q.Volume == p.Volume))
+                {
+                    if (item.Points == null)
                     {
-                        Date = price.Date,
-                        Value = price.Value,
-                        Volume = price.Volume
-                    };
-                    item.History.Add(history);
+                        item.Points = new List<Point>();
+                    }
+                    item.Points.Add(p);
+                    logger.LogInformation("New data point for item {item} has been added | Date: {date} Price: {prefix}{price}{sufix} Volume: {volume}", item.Name, p.Date, history.PricePrefix, p.Value, history.PriceSuffix, p.Volume);
                 }
             });
-            if (context.ChangeTracker.HasChanges())
-            {
-                context.SaveChanges();
-            }
+            context.SaveChanges();
         }
     }
 }
