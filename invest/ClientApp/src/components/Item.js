@@ -17,8 +17,8 @@ export default function Item(props) {
 
   if (item) {
     return (
-      <div className="pt-3 ps-3 pe-3">
-        <Card>
+      <div className="pb-3 ps-3 pe-3">
+        <Card className={props.active ? "shadow" : ""}>
           <CardImg className="p-2" alt="Item icon" src={item.url}/>
           <CardBody className="text-center">
             <Row className="m-0">

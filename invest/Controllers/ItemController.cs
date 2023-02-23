@@ -1,10 +1,12 @@
 ﻿using Hangfire;
 using invest.Data.Request;
 using invest.Data.Response;
+using invest.Data.Types;
 using invest.Jobs;
 using invest.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace invest.Controllers
 {
@@ -30,7 +32,40 @@ namespace invest.Controllers
         [HttpGet]
         public DataResponse<Item> GetItem(int id)
         {
-            return new DataResponse<Item>().Processed(dbContext.Items.Include(i => i.Points).FirstOrDefault(q => q.ItemId == id));
+            return new DataResponse<Item>().Processed(dbContext.Items.FirstOrDefault(q => q.ItemId == id));
+        }
+
+        [HttpGet]
+        public DataResponse<Item> GetChart(int id, ChartType type)
+        {
+            Item item = dbContext.Items.FirstOrDefault(q => q.ItemId == id);
+            switch (type) {
+                default:
+                case ChartType.Overall: 
+                {
+                    item.Points = dbContext.Points.Where(q => q.ItemId == id).GroupBy(g => g.Date.Date).Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) }).OrderBy(o => o.Date).ToList();
+                    break;
+                }
+
+                case ChartType.Year:
+                {
+                    item.Points = dbContext.Points.Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddYears(-1)).GroupBy(g => g.Date.Date).Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) }).OrderBy(o => o.Date).ToList();
+                    break;
+                }
+
+                case ChartType.Month:
+                {
+                    item.Points = dbContext.Points.Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddMonths(-1)).GroupBy(g => g.Date.Date).Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) }).OrderBy(o => o.Date).ToList();
+                    break;
+                }
+
+                case ChartType.Day:
+                {
+                    item.Points = dbContext.Points.Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddDays(-1)).OrderBy(o => o.Date).ToList();
+                    break;
+                }
+            }
+            return new DataResponse<Item>().Processed(item);
         }
 
         [HttpPut]

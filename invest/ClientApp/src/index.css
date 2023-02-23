@@ -1,13 +1,37 @@
 html {
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
 body {
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    background-color: #2F4858;
 }
 
 #root {
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+}
+
+.card {
+    color: #fff;
+    background-color: #2F4858;
+}
+
+.offcanvas {
+    color: #fff;
+    background-color: #485A73;
+}
+
+#chart {
+    display: flex;
 }
 
 .full-width {
@@ -18,16 +42,12 @@ body {
     height: 100vh;
 }
 
-.side-tab {
-    overflow: hidden;
-}
-
 .fill-width {
     width: 100%;
 }
 
 .fill-height {
-    height: 100%;
+    flex: 1 1 auto;
 }
 
 .scroll-container {
@@ -38,14 +58,51 @@ body {
     display: none;
 }
 
-.radius-lef-zero {
-    border-top-left-radius: 0;
+.radius-right-zero-top {
+    border-top-right-radius: 0;
+}
+
+.radius-right-zero-bottom {
+    border-bottom-right-radius: 0;
 }
 
 .radius-right-zero {
     border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.radius-lef-zero {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.radius-lef-zero-top {
+    border-top-left-radius: 0;
+}
+
+.radius-left-zero-bottom {
+    border-bottom-left-radius: 0;
+}
+
+.flex-end {
+    justify-content: flex-end;
+}
+
+.animation {
+    flex: 1 1 auto;
+    display: inline-flex !important;
+    flex-direction: column;
+}
+
+.on-top {
+    z-index: 99;
 }
 
 .item {
     cursor: pointer;
+}
+
+.zoom-out {
+    top: 1.5rem;
+    right: 1.5rem;
 }

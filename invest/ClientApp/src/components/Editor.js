@@ -1,4 +1,4 @@
-import {Button, Form, FormGroup, Input, InputGroup, Label, Offcanvas, OffcanvasBody, OffcanvasHeader} from "reactstrap";
+import {Button, Form, FormGroup, Input, Label, Offcanvas, OffcanvasBody, OffcanvasHeader} from "reactstrap";
 import {useEffect, useState} from "react";
 
 let tempItem = {
@@ -23,7 +23,7 @@ export default function Editor(props) {
     } else {
       setItem(tempItem)
     }
-  }, [props.type, selected])
+  }, [props.type, props.items.length, selected])
 
   let title = (type) => {
     switch (type) {
@@ -159,7 +159,7 @@ export default function Editor(props) {
               <Label for="name">
                 Name
               </Label>
-              <Input id="name" name="name" type="text" value={item.name} disabled={disabled(props.type)} onChange={onChange}/>
+              <Input  id="name" name="name" type="text" value={item.name} disabled={disabled(props.type)} onChange={onChange}/>
             </FormGroup>
             <FormGroup>
               <Label for="hash">

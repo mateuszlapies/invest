@@ -1,13 +1,18 @@
-import {Button, ButtonGroup, Col, Row} from "reactstrap";
+import {Button, ButtonGroup, ButtonToolbar, Col, Row} from "reactstrap";
 import {useEffect, useState} from "react";
 import Item from "./components/Item";
 import Editor from "./components/Editor";
 import Chart from "./components/Chart";
+import {Transition} from "react-transition-group";
+import Animation from "./components/Animation";
 
 export default function App() {
   let [items, setItems] = useState([])
   let [type, setType] = useState("")
   let [chart, setChart] = useState(0)
+  let [itemOptions, setItemOptions] = useState(false)
+  let [chartOptions, setChartOptions] = useState(false)
+  let [chartType, setChartType] = useState("overall")
   let [error, setError] = useState()
 
   useEffect(() => {
@@ -20,12 +25,20 @@ export default function App() {
   }, [type])
 
   useEffect(() => {
+    if (itemOptions) {
+      setTimeout(() => setItemOptions(false), 5000)
+    }
+  }, [itemOptions])
 
-  })
+  useEffect(() => {
+    if (chartOptions) {
+      setTimeout(() => setChartOptions(false), 5000)
+    }
+  }, [chartOptions])
 
-  let showChart = (id) => {
+  let showChart = (id, type) => {
     if (items.length > 0) {
-      return <Chart item={items[id]}/>
+      return <Chart item={items[id]} type={type}/>
     } else {
       return <></>
     }
@@ -33,20 +46,55 @@ export default function App() {
 
   return (
     <>
-      <Row className="m-0 full-height">
-        <Col id="chart" className="fill-height">
-          {showChart(chart)}
+      <Row className="m-0 mb-3">
+        <Col xs="2" className="ps-0">
+          <ButtonToolbar>
+            <ButtonGroup size="lg">
+              <Button onClick={() => setChartOptions(!chartOptions)} className="radius-right-zero radius-lef-zero on-top"><i className="bi bi-graph-up"/></Button>
+            </ButtonGroup>
+            <Transition in={chartOptions} timeout={0}>
+              {state => (
+                <Animation state={state} direction="left">
+                  <ButtonGroup size="lg">
+                    <Button className="radius-lef-zero" disabled={chartType === "overall"} onClick={() => setChartType("overall")}>Overall</Button>
+                    <Button disabled={chartType === "year"} onClick={() => setChartType("year")}>Year</Button>
+                    <Button disabled={chartType === "month"} onClick={() => setChartType("month")}>Month</Button>
+                    <Button className="radius-right-zero-top" disabled={chartType === "day"} onClick={() => setChartType("day")}>Day</Button>
+                  </ButtonGroup>
+                </Animation>
+              )}
+            </Transition>
+          </ButtonToolbar>
         </Col>
-        <Col xs="2" className="pe-0 full-height side-tab">
-          <ButtonGroup className="fill-width pb-3" size="lg">
-            <Button className="radius-lef-zero" onClick={() => setType("add")}>Add</Button>
-            <Button onClick={() => setType("edit")}>Edit</Button>
-            <Button className="radius-right-zero" onClick={() => setType("delete")}>Delete</Button>
-          </ButtonGroup>
+        <Col/>
+        <Col xs="2" className="pe-0">
+          <ButtonToolbar className="flex-end">
+            <Transition in={itemOptions} timeout={0}>
+              {state => (
+                <Animation state={state} direction="right">
+                  <ButtonGroup size="lg">
+                    <Button className="radius-lef-zero-top" onClick={() => setType("add")}>Add</Button>
+                    <Button onClick={() => setType("edit")}>Edit</Button>
+                    <Button className="radius-right-zero" onClick={() => setType("delete")}>Delete</Button>
+                  </ButtonGroup>
+                </Animation>
+              )}
+            </Transition>
+            <ButtonGroup size="lg">
+              <Button onClick={() => setItemOptions(!itemOptions)} className="radius-right-zero radius-lef-zero on-top"><i className="bi bi-gear-wide-connected"/></Button>
+            </ButtonGroup>
+          </ButtonToolbar>
+        </Col>
+      </Row>
+      <Row className="m-0 fill-height">
+        <Col xs="10" id="chart" className="fill-height">
+          {showChart(chart, chartType)}
+        </Col>
+        <Col xs="2" className="pe-0 side-tab">
           <div className="fill-height scroll-container">
             {items.map((item, index) => (
               <div key={index} onClick={() => setChart(index)} className="item">
-                <Item id={item.key}/>
+                <Item id={item.key} active={chart === index}/>
               </div>
             ))}
           </div>
