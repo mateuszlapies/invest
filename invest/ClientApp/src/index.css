@@ -30,6 +30,10 @@ body {
     background-color: #485A73;
 }
 
+.recharts-text {
+    fill: #fff
+}
+
 #chart {
     display: flex;
 }
@@ -105,4 +109,9 @@ body {
 .zoom-out {
     top: 1.5rem;
     right: 1.5rem;
+}
+
+.currency {
+    max-height: 50vh;
+    overflow-y: auto;
 }

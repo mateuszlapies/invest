@@ -5,6 +5,7 @@
         Overall,
         Year,
         Month,
+        Week,
         Day
     }
 }

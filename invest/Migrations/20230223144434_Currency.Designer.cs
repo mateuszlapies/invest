@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using invest.Model;
@@ -11,9 +12,11 @@ using invest.Model;
 namespace invest.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230223144434_Currency")]
+    partial class Currency
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,44 +52,17 @@ namespace invest.Migrations
                         new
                         {
                             CookieId = 1,
-                            Expires = new DateTime(2023, 3, 1, 18, 51, 36, 877, DateTimeKind.Utc).AddTicks(907),
+                            Expires = new DateTime(2023, 3, 1, 14, 44, 34, 171, DateTimeKind.Utc),
                             Name = "steamLoginSecure",
                             Value = "76561199480411558%7C%7C4ADF3CEAC29FEDE4F05761F7FB323DAFDE517DC2"
                         },
                         new
                         {
                             CookieId = 2,
-                            Expires = new DateTime(2023, 3, 1, 18, 51, 36, 877, DateTimeKind.Utc).AddTicks(959),
+                            Expires = new DateTime(2023, 3, 1, 14, 44, 34, 171, DateTimeKind.Utc).AddTicks(54),
                             Name = "sessionid",
                             Value = "f4aead9f9d5fb574d07c665c"
                         });
-                });
-
-            modelBuilder.Entity("invest.Model.Daily", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ItemId")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("MedianPrice")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("Volume")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
-
-                    b.ToTable("Daily");
                 });
 
             modelBuilder.Entity("invest.Model.Item", b =>
@@ -114,9 +90,6 @@ namespace invest.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Url")
                         .HasColumnType("text");
 
@@ -128,22 +101,11 @@ namespace invest.Migrations
                         new
                         {
                             ItemId = 1,
-                            BuyAmount = 40,
+                            BuyAmount = 30,
                             BuyPrice = 0.97999999999999998,
-                            Currency = 5,
+                            Currency = 0,
                             Hash = "Antwerp%202022%20Legends%20Sticker%20Capsule",
-                            Name = "Antwerp 2022 Legends Sticker Capsule",
-                            Order = 0
-                        },
-                        new
-                        {
-                            ItemId = 2,
-                            BuyAmount = 3,
-                            BuyPrice = 0.0,
-                            Currency = 5,
-                            Hash = "Operation%20Hydra%20Case",
-                            Name = "Operation Hydra Case",
-                            Order = 1
+                            Name = "Antwerp 2022 Legends Sticker Capsule"
                         });
                 });
 
@@ -174,13 +136,6 @@ namespace invest.Migrations
                     b.ToTable("Points");
                 });
 
-            modelBuilder.Entity("invest.Model.Daily", b =>
-                {
-                    b.HasOne("invest.Model.Item", null)
-                        .WithMany("Dailies")
-                        .HasForeignKey("ItemId");
-                });
-
             modelBuilder.Entity("invest.Model.Point", b =>
                 {
                     b.HasOne("invest.Model.Item", "Item")
@@ -194,8 +149,6 @@ namespace invest.Migrations
 
             modelBuilder.Entity("invest.Model.Item", b =>
                 {
-                    b.Navigation("Dailies");
-
                     b.Navigation("Points");
                 });
 #pragma warning restore 612, 618

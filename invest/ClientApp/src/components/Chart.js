@@ -1,8 +1,6 @@
 import {
-  Bar,
   CartesianGrid, ComposedChart,
   Line,
-  LineChart,
   ReferenceArea,
   ReferenceLine,
   Tooltip,
@@ -10,7 +8,7 @@ import {
   YAxis
 } from "recharts";
 import {useEffect, useState} from "react";
-import {Button, ButtonToolbar} from "reactstrap";
+import {Button, UncontrolledTooltip} from "reactstrap";
 
 const tempZoom = {
   refAreaLeft: undefined,
@@ -27,9 +25,9 @@ export default function Chart(props) {
   let [item, setItem] = useState();
   let [zoom, setZoom] = useState(tempZoom)
   let [error, setError] = useState(false);
-
   let [value, setValue] = useState(true);
   let [volume, setVolume] = useState(true);
+  let [reference, setReference] = useState(true);
 
   useEffect(() => {
     fetch("/api/Item/GetChart?id=" + props.item.key + "&type=" + props.type)
@@ -62,8 +60,8 @@ export default function Chart(props) {
   }
 
   let buyPrice = (price) => {
-    if (price > 0) {
-      return <ReferenceLine yAxisId="1" y={price} label={"Buy Price"} stroke="orange" strokeDasharray="3 3" />
+    if (price > 0 && reference) {
+      return <ReferenceLine yAxisId="1" y={price} label={"Buy Price"} stroke="#ED9660" strokeDasharray="4 4" />
     }
   }
 
@@ -119,6 +117,7 @@ export default function Chart(props) {
 
   let formatter = (value, name) => {
     switch (name) {
+      default:
       case "value":
         return [Math.round(value * 100) / 100 + "zł", "Price"]
       case "volume":
@@ -156,21 +155,49 @@ export default function Chart(props) {
           <YAxis stroke="#fff" yAxisId="1" allowDataOverflow domain={[zoom.bottom, zoom.top]} />
           <YAxis stroke="#fff" yAxisId="2" allowDataOverflow domain={[zoom.bottom2, zoom.top2]} orientation="right" />
           <Tooltip
+            contentStyle={{"backgroundColor": "#006E86"}}
             formatter={formatter}
-            labelFormatter={(label) => [new Date(label).toLocaleDateString()]}
+            labelFormatter={(label) => ["Date: " + new Date(label).toLocaleDateString()]}
           />
           {buyPrice(item.buyPrice)}
           {selection(zoom.refAreaLeft, zoom.refAreaRight)}
         </ComposedChart>
         <div className="position-absolute on-top zoom-out">
           <div>
-            <Button size="sm" onClick={zoomOut}><i className="bi bi-zoom-out"/></Button>
+            <Button id="zoom" size="sm" onClick={zoomOut}><i className="bi bi-zoom-out"/></Button>
+            <UncontrolledTooltip
+              placement="right"
+              target="zoom"
+            >
+              Zoom out the chart
+            </UncontrolledTooltip>
           </div>
           <div className="mt-2">
-            <Button size="sm" onClick={() => setValue(!value)}><i className="bi bi-graph-up-arrow"/></Button>
+            <Button id="price" size="sm" onClick={() => setValue(!value)}><i className="bi bi-graph-up-arrow"/></Button>
+            <UncontrolledTooltip
+              placement="right"
+              target="price"
+            >
+              {value ? "Hide " : "Show " }Price graph
+            </UncontrolledTooltip>
           </div>
           <div className="mt-2">
-            <Button size="sm" onClick={() => setVolume(!volume)}><i className="bi bi-bar-chart-line-fill"/></Button>
+            <Button id="volume" size="sm" onClick={() => setVolume(!volume)}><i className="bi bi-bar-chart-line-fill"/></Button>
+            <UncontrolledTooltip
+              placement="right"
+              target="volume"
+            >
+              {volume ? "Hide " : "Show " }Volume graph
+            </UncontrolledTooltip>
+          </div>
+          <div className="mt-2">
+            <Button id="ref" size="sm" onClick={() => setReference(!reference)}><i className="bi bi-reception-0"/></Button>
+            <UncontrolledTooltip
+              placement="right"
+              target="ref"
+            >
+              {reference ? "Hide " : "Show " }Reference lines
+            </UncontrolledTooltip>
           </div>
         </div>
       </div>

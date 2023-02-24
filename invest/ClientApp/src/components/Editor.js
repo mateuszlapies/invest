@@ -1,10 +1,22 @@
-import {Button, Form, FormGroup, Input, Label, Offcanvas, OffcanvasBody, OffcanvasHeader} from "reactstrap";
+import {
+  Button,
+  ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle,
+  Form,
+  FormGroup,
+  Input,
+  InputGroup,
+  Label,
+  Offcanvas,
+  OffcanvasBody,
+  OffcanvasHeader
+} from "reactstrap";
 import {useEffect, useState} from "react";
 
 let tempItem = {
   "name": "",
   "hash": "",
   "buyPrice": 0,
+  "currency": 0,
   "buyAmount": 0
 }
 
@@ -12,6 +24,8 @@ export default function Editor(props) {
   let [item, setItem] = useState(tempItem)
   let [selected, setSelected] = useState(1)
   let [error, setError] = useState(false)
+  let [currency, setCurrency] = useState(false)
+  let [currencies, setCurrencies] = useState([])
 
   useEffect(() => {
     if (props.type === "edit" || props.type === "delete") {
@@ -24,6 +38,12 @@ export default function Editor(props) {
       setItem(tempItem)
     }
   }, [props.type, props.items.length, selected])
+
+  useEffect(() => {
+    fetch("/api/Type/Currency")
+      .then(r => r.json())
+      .then(j => j.success ? setCurrencies(j.data) : setError(true))
+  }, [])
 
   let title = (type) => {
     switch (type) {
@@ -58,6 +78,7 @@ export default function Editor(props) {
               id="select"
               name="select"
               type="select"
+              value={selected}
               onChange={(e) => setSelected(Number.parseInt(e.target.value))}
             >
               {props.items.map((item, index) => (
@@ -171,11 +192,25 @@ export default function Editor(props) {
               <Label for="buy">
                 Buy Price
               </Label>
-              <Input id="buy" name="buyPrice" type="number" value={item.buyPrice} disabled={disabled(props.type)} onChange={onChange}/>
+              <InputGroup>
+                <ButtonDropdown isOpen={currency} toggle={() => setCurrency(!currency)}>
+                  <DropdownToggle caret>
+                    {currencies[item.currency]}
+                  </DropdownToggle>
+                  <DropdownMenu className="currency">
+                    {currencies.map((item, index) => (
+                      <DropdownItem key={index} disabled={index === item.currency} onClick={() => onChange({target: {name: "currency", value: index}})}>
+                        {item}
+                      </DropdownItem>
+                    ))}
+                  </DropdownMenu>
+                </ButtonDropdown>
+                <Input id="buy" name="buyPrice" type="number" value={item.buyPrice} disabled={disabled(props.type)} onChange={onChange}/>
+              </InputGroup>
             </FormGroup>
             <FormGroup>
               <Label for="amount">
-                Buy Amount
+                Amount
               </Label>
               <Input id="amount" name="buyAmount" type="number" value={item.buyAmount} disabled={disabled(props.type)} onChange={onChange}/>
             </FormGroup>

@@ -4,6 +4,8 @@ using invest.Data.Response;
 using invest.Data.Types;
 using invest.Jobs;
 using invest.Model;
+using invest.Steam;
+using invest.Steam.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -16,17 +18,19 @@ namespace invest.Controllers
     {
         private readonly ILogger<ItemController> logger;
         private readonly DatabaseContext dbContext;
+        private readonly SteamService steam;
 
-        public ItemController(ILogger<ItemController> logger, DatabaseContext dbContext)
+        public ItemController(ILogger<ItemController> logger, DatabaseContext dbContext, IServiceProvider serviceProvider)
         {
             this.logger = logger;
             this.dbContext = dbContext;
+            steam = new SteamService(serviceProvider);
         }
 
         [HttpGet]
-        public DataResponse<List<KeyValuePair<int, string>>> GetItems()
+        public DataResponse<Search> Search(string query)
         {
-            return new DataResponse<List<KeyValuePair<int, string>>>().Processed(dbContext.Items.Select(s => new KeyValuePair<int, string>(s.ItemId, s.Name)).ToList());
+            return new DataResponse<Search>().Processed(steam.SearchItems(query));
         }
 
         [HttpGet]
@@ -36,32 +40,69 @@ namespace invest.Controllers
         }
 
         [HttpGet]
+        public DataResponse<List<KeyValuePair<int, string>>> GetItems()
+        {
+            return new DataResponse<List<KeyValuePair<int, string>>>().Processed(dbContext.Items.OrderBy(o => o.Order).Select(s => new KeyValuePair<int, string>(s.ItemId, s.Name)).ToList());
+        }
+
+        [HttpGet]
         public DataResponse<Item> GetChart(int id, ChartType type)
         {
             Item item = dbContext.Items.FirstOrDefault(q => q.ItemId == id);
             switch (type) {
-                default:
                 case ChartType.Overall: 
                 {
-                    item.Points = dbContext.Points.Where(q => q.ItemId == id).GroupBy(g => g.Date.Date).Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) }).OrderBy(o => o.Date).ToList();
+                    item.Points = dbContext.Points
+                            .Where(q => q.ItemId == id)
+                            .GroupBy(g => g.Date.Date)
+                            .Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) })
+                            .OrderBy(o => o.Date)
+                            .ToList();
                     break;
                 }
 
                 case ChartType.Year:
                 {
-                    item.Points = dbContext.Points.Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddYears(-1)).GroupBy(g => g.Date.Date).Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) }).OrderBy(o => o.Date).ToList();
+                    item.Points = dbContext.Points
+                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddYears(-1))
+                            .GroupBy(g => g.Date.Date)
+                            .Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) })
+                            .OrderBy(o => o.Date)
+                            .ToList();
                     break;
                 }
 
                 case ChartType.Month:
                 {
-                    item.Points = dbContext.Points.Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddMonths(-1)).GroupBy(g => g.Date.Date).Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) }).OrderBy(o => o.Date).ToList();
+                    item.Points = dbContext.Points
+                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddMonths(-1))
+                            .GroupBy(g => g.Date.Date)
+                            .Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) })
+                            .OrderBy(o => o.Date)
+                            .ToList();
+                    break;
+                }
+
+                case ChartType.Week:
+                {
+                    item.Points = dbContext.Points
+                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddDays(-7))
+                            .OrderBy(o => o.Date)
+                            .ToList();
                     break;
                 }
 
                 case ChartType.Day:
                 {
-                    item.Points = dbContext.Points.Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddDays(-1)).OrderBy(o => o.Date).ToList();
+                    item.Points = dbContext.Points
+                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddDays(-1))
+                            .OrderBy(o => o.Date)
+                            .ToList();
+                    break;
+                }
+
+                default:
+                {
                     break;
                 }
             }
@@ -116,6 +157,26 @@ namespace invest.Controllers
             BackgroundJob.Enqueue<PriceHistoryJob>(x => x.Run(i));
             logger.LogInformation("Scheduled a PriceHistoryJob run for new item {item}", i.Name);
 
+            return new BaseResponse().Succeeded();
+        }
+
+        [HttpPost]
+        public BaseResponse ReorderItems(int[] order)
+        {
+            for (int i = 0; i < order.Length; i++)
+            {
+                Item item = dbContext.Items.FirstOrDefault(o => o.ItemId == order[i]);
+                if (item != null)
+                {
+                    item.Order = i;
+                } else
+                {
+                    logger.LogError("Reorder operation failed. Item not found {itemId}", item.ItemId);
+                    return new BaseResponse().Failed();
+                }
+            }
+            logger.LogInformation("Reordered items for user");
+            dbContext.SaveChanges();
             return new BaseResponse().Succeeded();
         }
 

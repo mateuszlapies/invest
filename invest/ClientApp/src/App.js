@@ -1,4 +1,4 @@
-import {Button, ButtonGroup, ButtonToolbar, Col, Row} from "reactstrap";
+import {Button, ButtonGroup, ButtonToolbar, Col, Input, InputGroup, InputGroupText, Row} from "reactstrap";
 import {useEffect, useState} from "react";
 import Item from "./components/Item";
 import Editor from "./components/Editor";
@@ -46,8 +46,8 @@ export default function App() {
 
   return (
     <>
-      <Row className="m-0 mb-3">
-        <Col xs="2" className="ps-0">
+      <Row className="m-0 mb-3 overflow-hidden">
+        <Col xs="3" className="ps-0">
           <ButtonToolbar>
             <ButtonGroup size="lg">
               <Button onClick={() => setChartOptions(!chartOptions)} className="radius-right-zero radius-lef-zero on-top"><i className="bi bi-graph-up"/></Button>
@@ -59,6 +59,7 @@ export default function App() {
                     <Button className="radius-lef-zero" disabled={chartType === "overall"} onClick={() => setChartType("overall")}>Overall</Button>
                     <Button disabled={chartType === "year"} onClick={() => setChartType("year")}>Year</Button>
                     <Button disabled={chartType === "month"} onClick={() => setChartType("month")}>Month</Button>
+                    <Button disabled={chartType === "week"} onClick={() => setChartType("week")}>Week</Button>
                     <Button className="radius-right-zero-top" disabled={chartType === "day"} onClick={() => setChartType("day")}>Day</Button>
                   </ButtonGroup>
                 </Animation>
@@ -66,7 +67,19 @@ export default function App() {
             </Transition>
           </ButtonToolbar>
         </Col>
-        <Col/>
+        <Col xs="1"/>
+        <Col xs="4">
+          <InputGroup>
+            <InputGroupText>
+              Price Tracker
+            </InputGroupText>
+            <Input />
+            <InputGroupText>
+              <i className="bi bi-search"/>
+            </InputGroupText>
+          </InputGroup>
+        </Col>
+        <Col xs="2"/>
         <Col xs="2" className="pe-0">
           <ButtonToolbar className="flex-end">
             <Transition in={itemOptions} timeout={0}>

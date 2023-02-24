@@ -1,6 +1,7 @@
 ﻿using invest.Model;
 using invest.Steam.Data;
 using System.Net;
+using System.Web;
 using Cookie = System.Net.Cookie;
 
 namespace invest.Steam
@@ -29,17 +30,36 @@ namespace invest.Steam
             client = new HttpClient(handler) { BaseAddress = uri };
         }
 
-        public PriceHistory GetPriceHistory(string hash)
+        public Daily GetPrice(string hash, Currency currency)
         {
-            string url = string.Format("/market/pricehistory?appid=730&country=PL&currency={0}&market_hash_name={1}", (int)Currency.PLN, hash);
+            string url = string.Format("http://steamcommunity.com//market/priceoverview", hash, (int)currency);
+            Price price = Get<Price>(url);
+            return new Daily()
+            {
+                Volume = int.Parse(price.Volume.Replace(",", "")),
+                Price = double.Parse(price.LowestPrice.Split(" ")[0]),
+                MedianPrice = double.Parse(price.MedianPrice.Split(" ")[0])
+            };
+        }
+
+        public PriceHistory GetPriceHistory(string hash, Currency currency)
+        {
+            string url = string.Format("/market/pricehistory?appid=730&country=PL&currency={0}&market_hash_name={1}", (int)currency, hash);
             return Get<PriceHistory>(url);
         }
 
         public string GetIconUrl(string hash)
         {
-            string url = string.Format("/market/search/render/?query={0}&norender=1&count=1&search_descriptions=0appid=730", hash);
+            string url = string.Format("/market/search/render/?query={0}&norender=1&count=1&search_descriptions=0&appid=730", hash);
             Search search = Get<Search>(url);
             return string.Format("https://steamcommunity-a.akamaihd.net/economy/image/{0}", search.Results.First().AssetDescription.IconUrl);
+        }
+
+        public Search SearchItems(string query)
+        {
+            string url = string.Format("/market/search/render/?query={0}&norender=1&search_descriptions=0appid=730", HttpUtility.UrlEncode(query));
+            Search search = Get<Search>(url);
+            return search;
         }
 
         private T Get<T>(string url)

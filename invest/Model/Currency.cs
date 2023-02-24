@@ -1,4 +1,4 @@
-﻿namespace invest.Steam.Data
+﻿namespace invest.Model
 {
     public enum Currency
     {

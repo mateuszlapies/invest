@@ -23,7 +23,7 @@ namespace invest.Jobs
         public void Run(Item i)
         {
             Item item = context.Items.FirstOrDefault(q => q.ItemId == i.ItemId);
-            PriceHistory history = service.GetPriceHistory(item.Hash);
+            PriceHistory history = service.GetPriceHistory(item.Hash, item.Currency);
             history.Prices.ForEach(price =>
             {
                 Point p = new Point()
