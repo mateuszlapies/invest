@@ -31,8 +31,9 @@ builder.Services.AddHangfire(conf => conf
     })
 );
 
-builder.Services.AddScoped<SteamAuthService>();
 builder.Services.AddHostedService<HangfireJobs>();
+
+builder.Services.AddTransient<SteamService>();
 
 builder.Services.AddHangfireServer();
 builder.Services.AddSwaggerGen();

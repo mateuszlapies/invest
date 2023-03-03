@@ -20,11 +20,11 @@ namespace invest.Controllers
         private readonly DatabaseContext dbContext;
         private readonly SteamService steam;
 
-        public ItemController(ILogger<ItemController> logger, DatabaseContext dbContext, IServiceProvider serviceProvider)
+        public ItemController(ILogger<ItemController> logger, DatabaseContext dbContext, SteamService steam)
         {
             this.logger = logger;
             this.dbContext = dbContext;
-            steam = new SteamService(serviceProvider);
+            this.steam = steam;
         }
 
         [HttpGet]

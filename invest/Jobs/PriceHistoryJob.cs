@@ -9,21 +9,21 @@ namespace invest.Jobs
     {
         private readonly ILogger<PriceHistoryJob> logger;
         private readonly DatabaseContext context;
-        private readonly SteamService service;
+        private readonly SteamService steam;
         private readonly CultureInfo provider;
 
-        public PriceHistoryJob(ILogger<PriceHistoryJob> logger, DatabaseContext context, IServiceProvider serviceProvider)
+        public PriceHistoryJob(ILogger<PriceHistoryJob> logger, DatabaseContext context, SteamService steam)
         {
             this.logger = logger;
             this.context = context;
-            service = new SteamService(serviceProvider);
+            this.steam = steam;
             provider = CultureInfo.GetCultureInfo("en-US");
         }
 
         public void Run(Item i)
         {
             Item item = context.Items.FirstOrDefault(q => q.ItemId == i.ItemId);
-            PriceHistory history = service.GetPriceHistory(item.Hash, item.Currency);
+            PriceHistory history = steam.GetPriceHistory(item.Hash, item.Currency);
             history.Prices.ForEach(price =>
             {
                 Point p = new Point()

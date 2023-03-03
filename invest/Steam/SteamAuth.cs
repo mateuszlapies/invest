@@ -3,44 +3,53 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System;
+using Cookie = invest.Model.Cookie;
 
 namespace invest.Steam
 {
-    public class SteamAuthService
+    public class SteamAuth
     {
-        private ILogger<SteamAuthService> logger;
+        private ILogger<SteamAuth> logger;
         private DatabaseContext context;
         private IConfigurationSection section;
 
-        private string SteamUser;
-        private string SteamPass;
-
         private Uri Uri { get; set; }
 
-        public SteamAuthService(ILogger<SteamAuthService> logger, IConfiguration configuration, DatabaseContext context)
+        public SteamAuth(ILogger<SteamAuth> logger, IConfiguration configuration, DatabaseContext context)
         {
             this.logger = logger;
             this.context = context;
-            this.section = configuration.GetSection("Steam");
+            section = configuration.GetSection("Steam");
             Uri = new Uri("https://steamcommunity.com");
+        }
 
-            if (!context.Cookies.Any(q => q.Expires > DateTime.UtcNow)) {
+        private bool Test()
+        {
+            CookieContainer cookies = new();
+            foreach (Cookie cookie in context.Cookies.Where(q => q.Expires > DateTime.UtcNow))
+            {
+                cookies.Add(Uri, new System.Net.Cookie(cookie.Name, cookie.Value));
+            }
+            using HttpClientHandler handler = new() { CookieContainer = cookies };
+            using HttpClient client = new HttpClient(handler) { BaseAddress = Uri };
+            string response = client.GetStringAsync("my").GetAwaiter().GetResult();
+            return true;
+        }
+
+        public void Login()
+        {
+            if (!context.Cookies.Any(q => q.Expires > DateTime.UtcNow) || Test())
+            {
                 RemoveAllCookies();
-                SteamUser = section.GetValue<string>("User");
-                SteamPass = section.GetValue<string>("Pass");
-                Login().GetAwaiter().GetResult();
+                string user = section.GetValue<string>("User");
+                string pass = section.GetValue<string>("Pass");
+                Login(user, pass).GetAwaiter().GetResult();
             }
         }
 
-        public void Relogin()
-        {
-            RemoveAllCookies();
-            SteamUser = section.GetValue<string>("User");
-            SteamPass = section.GetValue<string>("Pass");
-            Login().GetAwaiter().GetResult();
-        }
-
-        private async Task Login()
+        private async Task Login(string user, string pass)
         {
             HttpClient client = new HttpClient()
             {
@@ -50,8 +59,8 @@ namespace invest.Steam
 
             FormUrlEncodedContent content = new FormUrlEncodedContent(new[]
             {
-                    new KeyValuePair<string, string>("username", SteamUser)
-                });
+                new KeyValuePair<string, string>("username", user)
+            });
             HttpResponseMessage rsaResponse = await client.PostAsync("/login/getrsakey", content);
             logger.LogInformation(await rsaResponse.Content.ReadAsStringAsync());
             GetRsaKey rsaObject = await rsaResponse.Content.ReadFromJsonAsync<GetRsaKey>();
@@ -65,7 +74,7 @@ namespace invest.Steam
 
             rsa.ImportParameters(rsaParameters);
 
-            byte[] bytePassword = Encoding.ASCII.GetBytes(SteamPass);
+            byte[] bytePassword = Encoding.ASCII.GetBytes(pass);
             byte[] encodedPassword = rsa.Encrypt(bytePassword, false);
             string encryptedBase64Password = Convert.ToBase64String(encodedPassword);
 
@@ -92,7 +101,7 @@ namespace invest.Steam
                     new KeyValuePair<string, string>("password", encryptedBase64Password),
                     new KeyValuePair<string, string>("remember_login", "true"),
                     new KeyValuePair<string, string>("rsatimestamp", time),
-                    new KeyValuePair<string, string>("username", SteamUser),
+                    new KeyValuePair<string, string>("username", user),
                     new KeyValuePair<string, string>("donotcache", unixTimestamp.ToString())
                 });
 
@@ -126,7 +135,8 @@ namespace invest.Steam
                         context.Cookies.AddRange(_cookies);
                         context.SaveChanges();
                     }
-                } else
+                }
+                else
                 {
                     logger.LogError("Login failed: {msg}", loginResponse.StatusCode);
                     throw new Exception("Login failed");
@@ -161,6 +171,7 @@ namespace invest.Steam
         private void RemoveAllCookies()
         {
             context.Database.ExecuteSqlRaw("TRUNCATE ONLY public.\"Cookies\" RESTART IDENTITY");
+            context.SaveChanges();
         }
     }
 

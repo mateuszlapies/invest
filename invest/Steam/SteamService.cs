@@ -1,4 +1,6 @@
-﻿using invest.Model;
+﻿using Hangfire;
+using Hangfire.Storage;
+using invest.Model;
 using invest.Steam.Data;
 using System.Net;
 using System.Web;
@@ -9,16 +11,11 @@ namespace invest.Steam
     public class SteamService
     {
         private readonly ILogger<SteamService> logger;
-        private readonly SteamAuthService steamAuth;
-        private readonly DatabaseContext context;
         private readonly HttpClient client;
 
-        public SteamService(IServiceProvider serviceProvider)
+        public SteamService(ILogger<SteamService> logger, DatabaseContext context)
         {
-            IServiceProvider provider = serviceProvider.CreateScope().ServiceProvider;
-            logger = provider.GetRequiredService<ILogger<SteamService>>();
-            steamAuth = provider.GetRequiredService<SteamAuthService>();
-            context = provider.GetRequiredService<DatabaseContext>();
+            this.logger = logger;
 
             Uri uri = new("https://steamcommunity.com");
             CookieContainer cookies = new();
@@ -67,15 +64,25 @@ namespace invest.Steam
             HttpResponseMessage response = client.GetAsync(url).GetAwaiter().GetResult();
             do
             {
-                if (!response.IsSuccessStatusCode) 
+                if (!response.IsSuccessStatusCode)
                 {
                     logger.LogInformation("Cookies expired");
-                    steamAuth.Relogin();
+                    string job = BackgroundJob.Enqueue<SteamAuth>(x => x.Login());
+                    while (!JobCompleted(job))
+                    {
+                        Thread.Sleep(250);
+                    }
                     logger.LogInformation("Retrying");
                     response = client.GetAsync(url).GetAwaiter().GetResult();
                 }
             } while (!response.IsSuccessStatusCode);
             return response.Content.ReadFromJsonAsync<T>().GetAwaiter().GetResult();
+        }
+
+        private bool JobCompleted(string job)
+        {
+            IStorageConnection connection = JobStorage.Current.GetConnection();
+            return connection.GetJobData(job).State == "Succeeded";
         }
     }
 }

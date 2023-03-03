@@ -16,7 +16,12 @@ namespace invest.Jobs
             provider = serviceProvider.CreateScope().ServiceProvider;
             context = provider.GetRequiredService<DatabaseContext>();
             logger = provider.GetRequiredService<ILogger<HangfireJobs>>();
-            new SteamService(serviceProvider);
+            var steamAuthProvider = provider.CreateScope().ServiceProvider;
+            var steamAuthLogger = steamAuthProvider.GetRequiredService<ILogger<SteamAuth>>();
+            var steamAuthConfiguration = steamAuthProvider.GetRequiredService<IConfiguration>();
+            var steamAuthContext = steamAuthProvider.GetRequiredService<DatabaseContext>();
+            var steamAuth = new SteamAuth(steamAuthLogger, steamAuthConfiguration, steamAuthContext);
+            steamAuth.Login();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
