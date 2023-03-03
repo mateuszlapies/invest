@@ -62,27 +62,7 @@ namespace invest.Steam
         private T Get<T>(string url)
         {
             HttpResponseMessage response = client.GetAsync(url).GetAwaiter().GetResult();
-            do
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    logger.LogInformation("Cookies expired");
-                    string job = BackgroundJob.Enqueue<SteamAuth>(x => x.Login());
-                    while (!JobCompleted(job))
-                    {
-                        Thread.Sleep(250);
-                    }
-                    logger.LogInformation("Retrying");
-                    response = client.GetAsync(url).GetAwaiter().GetResult();
-                }
-            } while (!response.IsSuccessStatusCode);
             return response.Content.ReadFromJsonAsync<T>().GetAwaiter().GetResult();
-        }
-
-        private bool JobCompleted(string job)
-        {
-            IStorageConnection connection = JobStorage.Current.GetConnection();
-            return connection.GetJobData(job).State == "Succeeded";
         }
     }
 }
