@@ -49,14 +49,14 @@ namespace invest.Migrations
                         new
                         {
                             CookieId = 1,
-                            Expires = new DateTime(2023, 3, 1, 18, 51, 36, 877, DateTimeKind.Utc).AddTicks(907),
+                            Expires = new DateTime(2023, 3, 11, 12, 19, 21, 932, DateTimeKind.Utc).AddTicks(5269),
                             Name = "steamLoginSecure",
                             Value = "76561199480411558%7C%7C4ADF3CEAC29FEDE4F05761F7FB323DAFDE517DC2"
                         },
                         new
                         {
                             CookieId = 2,
-                            Expires = new DateTime(2023, 3, 1, 18, 51, 36, 877, DateTimeKind.Utc).AddTicks(959),
+                            Expires = new DateTime(2023, 3, 11, 12, 19, 21, 932, DateTimeKind.Utc).AddTicks(5368),
                             Name = "sessionid",
                             Value = "f4aead9f9d5fb574d07c665c"
                         });
@@ -76,8 +76,11 @@ namespace invest.Migrations
                     b.Property<double>("MedianPrice")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("Price")
+                    b.Property<double?>("Price")
                         .HasColumnType("double precision");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Volume")
                         .HasColumnType("integer");
@@ -130,7 +133,7 @@ namespace invest.Migrations
                             ItemId = 1,
                             BuyAmount = 40,
                             BuyPrice = 0.97999999999999998,
-                            Currency = 5,
+                            Currency = 6,
                             Hash = "Antwerp%202022%20Legends%20Sticker%20Capsule",
                             Name = "Antwerp 2022 Legends Sticker Capsule",
                             Order = 0
@@ -140,7 +143,7 @@ namespace invest.Migrations
                             ItemId = 2,
                             BuyAmount = 3,
                             BuyPrice = 0.0,
-                            Currency = 5,
+                            Currency = 6,
                             Hash = "Operation%20Hydra%20Case",
                             Name = "Operation Hydra Case",
                             Order = 1

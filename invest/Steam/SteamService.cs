@@ -29,14 +29,24 @@ namespace invest.Steam
 
         public Daily GetPrice(string hash, Currency currency)
         {
-            string url = string.Format("http://steamcommunity.com//market/priceoverview", hash, (int)currency);
+            string url = string.Format("/market/priceoverview?appid=730&market_hash_name={0}&currency={1}", hash, (int)currency);
             Price price = Get<Price>(url);
             return new Daily()
             {
-                Volume = int.Parse(price.Volume.Replace(",", "")),
-                Price = double.Parse(price.LowestPrice.Split(" ")[0]),
-                MedianPrice = double.Parse(price.MedianPrice.Split(" ")[0])
+                Volume = int.Parse(GetNumber(price.Volume)),
+                Price = double.Parse(GetDecimalNumber(price.LowestPrice)),
+                MedianPrice = double.Parse(GetDecimalNumber(price.MedianPrice))
             };
+        }
+
+        private string GetNumber(string text)
+        {
+            return string.Concat(text.Where(char.IsDigit));
+        }
+
+        private string GetDecimalNumber(string text)
+        {
+            return string.Concat(text.Where(c => char.IsDigit(c) || c == '.' || c == ','));
         }
 
         public PriceHistory GetPriceHistory(string hash, Currency currency)
@@ -62,7 +72,14 @@ namespace invest.Steam
         private T Get<T>(string url)
         {
             HttpResponseMessage response = client.GetAsync(url).GetAwaiter().GetResult();
-            return response.Content.ReadFromJsonAsync<T>().GetAwaiter().GetResult();
+            try
+            {
+                return response.Content.ReadFromJsonAsync<T>().GetAwaiter().GetResult();
+            } catch (Exception e)
+            {
+                logger.LogError("Steam request failed with: {exception}", e);
+                throw;
+            }
         }
     }
 }

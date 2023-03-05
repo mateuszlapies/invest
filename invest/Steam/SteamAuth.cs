@@ -32,15 +32,25 @@ namespace invest.Steam
             {
                 cookies.Add(Uri, new System.Net.Cookie(cookie.Name, cookie.Value));
             }
-            using HttpClientHandler handler = new() { CookieContainer = cookies };
-            using HttpClient client = new HttpClient(handler) { BaseAddress = Uri };
-            string response = client.GetStringAsync("my").GetAwaiter().GetResult();
-            return true;
+
+            using HttpClientHandler handler = new()
+            { 
+                CookieContainer = cookies, 
+                AllowAutoRedirect = false
+            };
+
+            using HttpClient client = new HttpClient(handler)
+            { 
+                BaseAddress = Uri
+            };
+
+            HttpResponseMessage response = client.GetAsync("my").GetAwaiter().GetResult();
+            return response.Headers.Location?.OriginalString != "https://steamcommunity.com/login/home/?goto=%2Fmy";
         }
 
         public void Login()
         {
-            if (!context.Cookies.Any(q => q.Expires > DateTime.UtcNow) || Test())
+            if (!context.Cookies.Any(q => q.Expires > DateTime.UtcNow) || !Test())
             {
                 RemoveAllCookies();
                 string user = section.GetValue<string>("User");
@@ -170,7 +180,7 @@ namespace invest.Steam
 
         private void RemoveAllCookies()
         {
-            context.Database.ExecuteSqlRaw("TRUNCATE ONLY public.\"Cookies\" RESTART IDENTITY");
+            context.Cookies.Where(c => c.Expires != DateTime.MinValue).ForEachAsync(c => c.Expires = DateTime.MinValue).GetAwaiter().GetResult();
             context.SaveChanges();
         }
     }

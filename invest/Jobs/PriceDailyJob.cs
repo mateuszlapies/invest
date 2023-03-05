@@ -22,6 +22,11 @@ namespace invest.Jobs
         {
             Item item = context.Items.FirstOrDefault(q => q.ItemId == i.ItemId);
             Daily daily = steam.GetPrice(item.Hash, item.Currency);
+            daily.Timestamp = DateTime.UtcNow;
+            if (item.Dailies == null)
+            {
+                item.Dailies = new List<Daily>();
+            }
             item.Dailies.Add(daily);
             logger.LogInformation("New daily data point for item {item} has been added | Date: {date} Price: {price} MedianPrice: {medianPrice} Volume: {volume}", item.Name, DateTime.UtcNow, daily.Price, daily.MedianPrice, daily.Volume);
             context.SaveChanges();

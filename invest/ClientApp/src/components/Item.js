@@ -3,7 +3,8 @@ import {Card, CardBody, CardImg, Col, Row} from "reactstrap";
 
 export default function Item(props) {
   let [item, setItem] = useState();
-  let [error, setError] = useState();
+  let [currencies, setCurrencies] = useState([]);
+  let [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("api/Item/GetItem?id=" + props.id)
@@ -11,8 +12,18 @@ export default function Item(props) {
       .then(j => j.success ? setItem(j.data) : setError(true))
   }, [props.id])
 
+  useEffect(() => {
+    fetch("api/Type/Currency")
+      .then(r => r.json())
+      .then(j => j.success ? setCurrencies(j.data) : setError(true))
+  }, [])
+
   let profit = (buyPrice, sellPrice, buyAmount) => {
     return (sellPrice - buyPrice) * buyAmount;
+  }
+
+  let price = (number, currency) => {
+    return Number(number).toLocaleString(navigator.language, {style: "currency", currency: currencies[currency]})
   }
 
   if (item) {
@@ -27,12 +38,14 @@ export default function Item(props) {
               </Col>
             </Row>
             <Row className="m-0">
-              <Col>Buy:</Col><Col>{item.buyPrice}zł</Col>
-              <Col>Amount:</Col><Col>{item.buyAmount}</Col>
+              <Col>Amount: {item.buyAmount}</Col>
             </Row>
             <Row className="m-0">
-              <Col>Sell:</Col><Col>0zł</Col>
-              <Col>Profit:</Col><Col>{profit(item.buyPrice, 0, item.buyAmount)}zł</Col>
+              <Col xs="2">Buy:</Col><Col>{price(item.buyPrice, item.currency)}</Col>
+              <Col xs="2">Sell:</Col><Col>{price(item.sellPrice, item.currency)}</Col>
+            </Row>
+            <Row>
+              <Col>Profit:</Col><Col>{price(profit(item.buyPrice, item.sellPrice, item.buyAmount), item.currency)}</Col>
             </Row>
           </CardBody>
         </Card>

@@ -36,7 +36,12 @@ namespace invest.Controllers
         [HttpGet]
         public DataResponse<Item> GetItem(int id)
         {
-            return new DataResponse<Item>().Processed(dbContext.Items.FirstOrDefault(q => q.ItemId == id));
+            Item item = dbContext.Items.Include(i => i.Dailies).FirstOrDefault(q => q.ItemId == id);
+            if (item != null)
+            {
+                item.SellPrice = item.Dailies.OrderByDescending(o => o.Timestamp).Select(s => s.Price).FirstOrDefault() ?? 0;
+            }
+            return new DataResponse<Item>().Processed(item);
         }
 
         [HttpGet]

@@ -10,6 +10,7 @@ namespace invest.Jobs
         private IServiceProvider provider;
         private DatabaseContext context;
         private ILogger<HangfireJobs> logger;
+        private List<string> jobIds = new List<string>();
 
         public HangfireJobs(IServiceProvider serviceProvider)
         {
@@ -36,10 +37,14 @@ namespace invest.Jobs
                         logger.LogInformation("Scheduled a ItemDetailsJob for item {item}", i.Name);
                     }
 
-                    RecurringJob.AddOrUpdate<PriceDailyJob>(x => x.Run(i), Cron.Minutely);
+                    string mbmId = string.Format("Minute by minute price for {0}", i.Name);
+                    RecurringJob.AddOrUpdate<PriceDailyJob>(mbmId, x => x.Run(i), Cron.Minutely);
+                    jobIds.Add(mbmId);
                     logger.LogInformation("Scheduled a recurring daily PriceHistoryJob for item {item}", i.Name);
 
-                    RecurringJob.AddOrUpdate<PriceHistoryJob>(x => x.Run(i), Cron.Daily);
+                    string phId = string.Format("Price history for {0}", i.Name);
+                    RecurringJob.AddOrUpdate<PriceHistoryJob>(phId, x => x.Run(i), Cron.Daily);
+                    jobIds.Add(phId);
                     logger.LogInformation("Scheduled a recurring daily PriceHistoryJob for item {item}", i.Name);
                 });
             });
@@ -49,7 +54,7 @@ namespace invest.Jobs
         {
             return Task.Factory.StartNew(() =>
             {
-
+                jobIds.ForEach(e => RecurringJob.RemoveIfExists(e));
             });
         }
     }
