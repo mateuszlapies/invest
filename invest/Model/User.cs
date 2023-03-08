@@ -1,9 +1,12 @@
-﻿namespace invest.Model
+﻿using invest.Model.Steam;
+
+namespace invest.Model
 {
     public class User
     {
-        public int Id { get; set; }
+        public Guid UserId { get; set; }
         public string Name { get; set; }
-        public List<Item> Items { get; set; }
+        public Currency DefaultCurrency { get; set; }
+        public List<UserItem> Items { get; set; }
     }
 }

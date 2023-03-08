@@ -1,7 +1,8 @@
 ﻿using invest.Model;
 using invest.Steam.Data;
-using invest.Steam;
 using System.Globalization;
+using invest.Model.Steam;
+using invest.Services;
 
 namespace invest.Jobs
 {

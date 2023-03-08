@@ -1,5 +1,6 @@
 ﻿using invest.Model;
-using invest.Steam;
+using invest.Model.Steam;
+using invest.Services;
 
 namespace invest.Jobs
 {

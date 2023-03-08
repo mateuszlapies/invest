@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System;
-using Cookie = invest.Model.Cookie;
+using Cookie = invest.Model.Steam.Cookie;
 
 namespace invest.Steam
 {

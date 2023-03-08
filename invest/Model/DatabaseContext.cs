@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using invest.Model.NBP;
+using invest.Model.Steam;
+using Microsoft.EntityFrameworkCore;
 
 namespace invest.Model
 {
@@ -6,16 +8,20 @@ namespace invest.Model
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserItem> UserItems { get; set; }
         public DbSet<Item> Items { get; set; }
         public List<Daily> Dailies { get; set; }
         public DbSet<Point> Points { get; set; }
         public DbSet<Cookie> Cookies { get; set; }
+        public DbSet<Exchange> Exchanges { get; set; }
+        public DbSet<Rate> Rates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Item>().HasData(
-                new Item() { ItemId = 1, Name = "Antwerp 2022 Legends Sticker Capsule", Hash = "Antwerp%202022%20Legends%20Sticker%20Capsule", Currency = Currency.PLN, BuyPrice = 0.98, BuyAmount = 40, Order = 0 },
-                new Item() { ItemId = 2, Name = "Operation Hydra Case", Hash = "Operation%20Hydra%20Case", Currency = Currency.PLN, BuyPrice = 0, BuyAmount = 3, Order = 1 }
+                new Item() { ItemId = 1, Name = "Antwerp 2022 Legends Sticker Capsule", Hash = "Antwerp%202022%20Legends%20Sticker%20Capsule" },
+                new Item() { ItemId = 2, Name = "Operation Hydra Case", Hash = "Operation%20Hydra%20Case" }
             );
 
             builder.Entity<Cookie>().HasData(new Cookie[]

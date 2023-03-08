@@ -2,7 +2,7 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using invest.Jobs;
 using invest.Model;
-using invest.Steam;
+using invest.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Text.Json.Serialization;
@@ -34,6 +34,7 @@ builder.Services.AddHangfire(conf => conf
 builder.Services.AddHostedService<HangfireJobs>();
 
 builder.Services.AddTransient<SteamService>();
+builder.Services.AddTransient<ItemService>();
 
 builder.Services.AddHangfireServer();
 builder.Services.AddSwaggerGen();

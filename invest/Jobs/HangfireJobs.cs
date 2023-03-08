@@ -29,6 +29,11 @@ namespace invest.Jobs
         {
             return Task.Factory.StartNew(() =>
             {
+                string erId = "Exchange Rates Update";
+                RecurringJob.AddOrUpdate<ExchangeRateJob>(erId, x => x.Run(), Cron.Daily);
+                jobIds.Add(erId);
+                logger.LogInformation("Scheduled a ExchangeRateJob");
+
                 context.Items.ForEachAsync(i =>
                 {
                     if (i.Url == null)

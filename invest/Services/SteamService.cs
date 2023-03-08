@@ -1,12 +1,13 @@
 ﻿using Hangfire;
 using Hangfire.Storage;
 using invest.Model;
+using invest.Model.Steam;
 using invest.Steam.Data;
 using System.Net;
 using System.Web;
 using Cookie = System.Net.Cookie;
 
-namespace invest.Steam
+namespace invest.Services
 {
     public class SteamService
     {
@@ -19,7 +20,7 @@ namespace invest.Steam
 
             Uri uri = new("https://steamcommunity.com");
             CookieContainer cookies = new();
-            foreach(Model.Cookie cookie in context.Cookies.Where(q => q.Expires > DateTime.UtcNow))
+            foreach (Model.Steam.Cookie cookie in context.Cookies.Where(q => q.Expires > DateTime.UtcNow))
             {
                 cookies.Add(uri, new Cookie(cookie.Name, cookie.Value));
             }
@@ -27,9 +28,9 @@ namespace invest.Steam
             client = new HttpClient(handler) { BaseAddress = uri };
         }
 
-        public Daily GetPrice(string hash, Currency currency)
+        public Daily GetPrice(string hash)
         {
-            string url = string.Format("/market/priceoverview?appid=730&market_hash_name={0}&currency={1}", hash, (int)currency);
+            string url = string.Format("/market/priceoverview?appid=730&market_hash_name={0}&currency={1}", hash, (int)Currency.USD);
             Price price = Get<Price>(url);
             return new Daily()
             {
@@ -49,9 +50,9 @@ namespace invest.Steam
             return string.Concat(text.Where(c => char.IsDigit(c) || c == '.' || c == ','));
         }
 
-        public PriceHistory GetPriceHistory(string hash, Currency currency)
+        public PriceHistory GetPriceHistory(string hash)
         {
-            string url = string.Format("/market/pricehistory?appid=730&country=PL&currency={0}&market_hash_name={1}", (int)currency, hash);
+            string url = string.Format("/market/pricehistory?appid=730&country=PL&currency={0}&market_hash_name={1}", (int)Currency.USD, hash);
             return Get<PriceHistory>(url);
         }
 
@@ -75,7 +76,8 @@ namespace invest.Steam
             try
             {
                 return response.Content.ReadFromJsonAsync<T>().GetAwaiter().GetResult();
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 logger.LogError("Steam request failed with: {exception}", e);
                 throw;

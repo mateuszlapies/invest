@@ -1,4 +1,4 @@
-﻿namespace invest.Model
+﻿namespace invest.Model.Steam
 {
     public class Point
     {

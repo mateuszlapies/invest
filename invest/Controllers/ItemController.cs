@@ -4,7 +4,8 @@ using invest.Data.Response;
 using invest.Data.Types;
 using invest.Jobs;
 using invest.Model;
-using invest.Steam;
+using invest.Model.Steam;
+using invest.Services;
 using invest.Steam.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,121 +19,48 @@ namespace invest.Controllers
     {
         private readonly ILogger<ItemController> logger;
         private readonly DatabaseContext dbContext;
-        private readonly SteamService steam;
+        private readonly ItemService service;
 
-        public ItemController(ILogger<ItemController> logger, DatabaseContext dbContext, SteamService steam)
+        public ItemController(ILogger<ItemController> logger, DatabaseContext dbContext, ItemService service)
         {
             this.logger = logger;
             this.dbContext = dbContext;
-            this.steam = steam;
+            this.service = service;
         }
 
         [HttpGet]
         public DataResponse<Search> Search(string query)
         {
-            return new DataResponse<Search>().Processed(steam.SearchItems(query));
+            return new DataResponse<Search>().Processed(service.Search(query));
         }
 
         [HttpGet]
-        public DataResponse<Item> GetItem(int id)
+        public DataResponse<UserItem> GetItem(Guid id)
         {
-            Item item = dbContext.Items.Include(i => i.Dailies).FirstOrDefault(q => q.ItemId == id);
-            if (item != null)
-            {
-                item.SellPrice = item.Dailies.OrderByDescending(o => o.Timestamp).Select(s => s.Price).FirstOrDefault() ?? 0;
-            }
-            return new DataResponse<Item>().Processed(item);
+            
+            return new DataResponse<UserItem>().Processed(service.Get(id));
         }
 
         [HttpGet]
-        public DataResponse<List<KeyValuePair<int, string>>> GetItems()
+        public DataResponse<List<KeyValuePair<Guid, string>>> GetItems(User user)
         {
-            return new DataResponse<List<KeyValuePair<int, string>>>().Processed(dbContext.Items.OrderBy(o => o.Order).Select(s => new KeyValuePair<int, string>(s.ItemId, s.Name)).ToList());
-        }
-
-        [HttpGet]
-        public DataResponse<Item> GetChart(int id, ChartType type)
-        {
-            Item item = dbContext.Items.FirstOrDefault(q => q.ItemId == id);
-            switch (type) {
-                case ChartType.Overall: 
-                {
-                    item.Points = dbContext.Points
-                            .Where(q => q.ItemId == id)
-                            .GroupBy(g => g.Date.Date)
-                            .Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) })
-                            .OrderBy(o => o.Date)
-                            .ToList();
-                    break;
-                }
-
-                case ChartType.Year:
-                {
-                    item.Points = dbContext.Points
-                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddYears(-1))
-                            .GroupBy(g => g.Date.Date)
-                            .Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) })
-                            .OrderBy(o => o.Date)
-                            .ToList();
-                    break;
-                }
-
-                case ChartType.Month:
-                {
-                    item.Points = dbContext.Points
-                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddMonths(-1))
-                            .GroupBy(g => g.Date.Date)
-                            .Select(s => new Point() { Date = s.Key, Value = Math.Round(s.Average(sel => sel.Value), 2), Volume = s.Sum(sel => sel.Volume) })
-                            .OrderBy(o => o.Date)
-                            .ToList();
-                    break;
-                }
-
-                case ChartType.Week:
-                {
-                    item.Points = dbContext.Points
-                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddDays(-7))
-                            .OrderBy(o => o.Date)
-                            .ToList();
-                    break;
-                }
-
-                case ChartType.Day:
-                {
-                    item.Points = dbContext.Points
-                            .Where(q => q.ItemId == id && q.Date > DateTime.UtcNow.AddDays(-1))
-                            .OrderBy(o => o.Date)
-                            .ToList();
-                    break;
-                }
-
-                default:
-                {
-                    break;
-                }
-            }
-            return new DataResponse<Item>().Processed(item);
+            return new DataResponse<List<KeyValuePair<Guid, string>>>().Processed(service.GetItems(user));
         }
 
         [HttpPut]
         public BaseResponse CreateItem(ItemRequest item)
         {
-            Item i = new Item()
+            UserItem userItem = new UserItem()
             {
-                Name = item.Name,
-                Hash = item.Hash,
                 BuyPrice = item.BuyPrice,
-                BuyAmount = item.BuyAmount
+                BuyAmount = item.BuyAmount,
+                Item = new Item()
+                {
+                    Name = item.Name,
+                    Hash = item.Hash,
+                }
             };
-            dbContext.Items.Add(i);
-            dbContext.SaveChanges();
-            logger.LogInformation("New item has been created {item}", i.Name);
-
-            BackgroundJob.Enqueue<ItemDetailsJob>(x => x.Run(i));
-            logger.LogInformation("Scheduled a ItemDetailsJob run for new item {item}", i.Name);
-
-            BackgroundJob.Enqueue<PriceHistoryJob>(x => x.Run(i));
-            logger.LogInformation("Scheduled a PriceHistoryJob run for new item {item}", i.Name);
+            
 
             return new BaseResponse().Succeeded();
         }
