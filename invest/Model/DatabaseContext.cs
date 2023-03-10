@@ -20,8 +20,8 @@ namespace invest.Model
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Item>().HasData(
-                new Item() { ItemId = 1, Name = "Antwerp 2022 Legends Sticker Capsule", Hash = "Antwerp%202022%20Legends%20Sticker%20Capsule" },
-                new Item() { ItemId = 2, Name = "Operation Hydra Case", Hash = "Operation%20Hydra%20Case" }
+                new Item() { ItemId = 1, Key = "A2LSC", Name = "Antwerp 2022 Legends Sticker Capsule", Hash = "Antwerp%202022%20Legends%20Sticker%20Capsule" },
+                new Item() { ItemId = 2, Key = "OHC", Name = "Operation Hydra Case", Hash = "Operation%20Hydra%20Case" }
             );
 
             builder.Entity<Cookie>().HasData(new Cookie[]

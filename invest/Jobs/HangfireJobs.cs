@@ -36,12 +36,6 @@ namespace invest.Jobs
 
                 context.Items.ForEachAsync(i =>
                 {
-                    if (i.Url == null)
-                    {
-                        BackgroundJob.Enqueue<ItemDetailsJob>(x => x.Run(i));
-                        logger.LogInformation("Scheduled a ItemDetailsJob for item {item}", i.Name);
-                    }
-
                     string mbmId = string.Format("Minute by minute price for {0}", i.Name);
                     RecurringJob.AddOrUpdate<PriceDailyJob>(mbmId, x => x.Run(i), Cron.Minutely);
                     jobIds.Add(mbmId);

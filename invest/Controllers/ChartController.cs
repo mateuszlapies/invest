@@ -20,7 +20,6 @@ namespace invest.Controllers
         [HttpGet]
         public DataResponse<UserItem> GetChart(Guid id, ChartType type)
         {
-
             return new DataResponse<UserItem>().Processed(service.Get(id, type));
         }
     }

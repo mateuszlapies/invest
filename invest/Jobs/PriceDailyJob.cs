@@ -22,7 +22,7 @@ namespace invest.Jobs
         public void Run(Item i)
         {
             Item item = context.Items.FirstOrDefault(q => q.ItemId == i.ItemId);
-            Daily daily = steam.GetPrice(item.Hash, item.Currency);
+            Daily daily = steam.GetPrice(item.Hash);
             daily.Timestamp = DateTime.UtcNow;
             if (item.Dailies == null)
             {

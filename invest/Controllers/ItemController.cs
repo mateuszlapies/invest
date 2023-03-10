@@ -61,6 +61,7 @@ namespace invest.Controllers
                 }
             };
             
+            service.Create(userItem);
 
             return new BaseResponse().Succeeded();
         }
@@ -68,64 +69,55 @@ namespace invest.Controllers
         [HttpPost]
         public BaseResponse UpdateItem(ItemRequest item)
         {
-            Item i = dbContext.Items.FirstOrDefault(q => q.ItemId == item.ItemId);
-
-            if (i == null)
+            UserItem userItem = new UserItem()
             {
-                logger.LogError("Failed to update item. Id not found {id}", item.ItemId);
-                return new BaseResponse().Failed();
-            }
+                BuyPrice = item.BuyPrice,
+                BuyAmount = item.BuyAmount,
+                Item = new Item()
+                {
+                    Name = item.Name,
+                    Hash = item.Hash,
+                }
+            };
 
-            i.Name = item.Name;
-            i.Hash = item.Hash;
-            i.BuyPrice = item.BuyPrice;
-            i.BuyAmount = item.BuyAmount;
-
-            dbContext.SaveChanges();
-            logger.LogInformation("Item has been updated {item}", i.Name);
-
-            BackgroundJob.Enqueue<ItemDetailsJob>(x => x.Run(i));
-            logger.LogInformation("Scheduled a ItemDetailsJob run for new item {item}", i.Name);
-
-            BackgroundJob.Enqueue<PriceHistoryJob>(x => x.Run(i));
-            logger.LogInformation("Scheduled a PriceHistoryJob run for new item {item}", i.Name);
+            service.Update(userItem);
 
             return new BaseResponse().Succeeded();
         }
 
         [HttpPost]
-        public BaseResponse ReorderItems(int[] order)
+        public BaseResponse ReorderItems(Guid[] order)
         {
             for (int i = 0; i < order.Length; i++)
             {
-                Item item = dbContext.Items.FirstOrDefault(o => o.ItemId == order[i]);
+                UserItem item = dbContext.UserItems.FirstOrDefault(o => o.UserItemId == order[i]);
                 if (item != null)
                 {
                     item.Order = i;
                 } else
                 {
-                    logger.LogError("Reorder operation failed. Item not found {itemId}", item.ItemId);
+                    logger.LogError("Reorder operation failed. Item not found {itemId}", item.UserItemId);
                     return new BaseResponse().Failed();
                 }
             }
-            logger.LogInformation("Reordered items for user");
             dbContext.SaveChanges();
+            logger.LogInformation("Reordered items for user");
             return new BaseResponse().Succeeded();
         }
 
         [HttpDelete]
-        public BaseResponse DeleteItem(int id)
+        public BaseResponse DeleteItem(Guid id)
         {
-            Item item = dbContext.Items.FirstOrDefault(q => q.ItemId == id);
+            UserItem item = dbContext.UserItems.FirstOrDefault(q => q.UserItemId == id);
             if (item == null)
             {
                 logger.LogError("Failed to delete item. Id not found {id}", id);
                 return new BaseResponse().Failed();
             }
                 
-            dbContext.Items.Remove(item);
+            dbContext.UserItems.Remove(item);
             dbContext.SaveChanges();
-            logger.LogInformation("Item has been removed {item}", item.Name);
+            logger.LogInformation("Item has been removed for user");
 
             return new BaseResponse().Succeeded();
         }
