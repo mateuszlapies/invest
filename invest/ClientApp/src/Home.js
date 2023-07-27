@@ -80,7 +80,6 @@ export default function Home() {
                 <InputGroupText>
                   <i className="bi bi-search"/>
                 </InputGroupText>
-                <Input type="submit" onClick={() => content.login()}>Login</Input>
               </InputGroup>
             </Col>
             <Col xs="2"/>

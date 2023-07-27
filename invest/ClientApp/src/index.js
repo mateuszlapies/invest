@@ -2,18 +2,18 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import './index.css';
 import AuthContextProvider from "./contexts/AuthContext";
+import Router from "./components/Router";
 
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
 
 root.render(
   <AuthContextProvider>
-    <App />
+    <Router/>
   </AuthContextProvider>
 );
 

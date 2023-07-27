@@ -30,23 +30,26 @@ const AuthContextProvider = (props) => {
       url += ":" + process.env.PORT;
     }
 
-    passport.use(new SteamStrategy({
-        returnURL: 'https://' + url + '/api/Auth/Login',
+    passport.use('steam', new SteamStrategy({
+        returnURL: 'https://' + url + '/login/response',
         realm: 'https://' + url + '/',
         apiKey: process.env.STEAM
       }, function (identifier, profile, done) {
+        debugger
         process.nextTick(function () {
           profile.identifier = identifier;
           return done(null, profile);
         });
       }
     ));
+    passport.initialize()
+    passport.session()
   }, [])
 
   const login = () => {
-    debugger
-    passport.initialize()
-    console.log(passport.session())
+    return passport.authenticate('steam', {failureRedirect: '/', redirectIfFound: true}, (req, res) => {
+      res.redirect('/')
+    })
   }
 
   const logout = () => {
