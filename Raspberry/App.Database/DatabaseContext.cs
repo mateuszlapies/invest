@@ -14,8 +14,20 @@ namespace Raspberry.App.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Base>()
-                .Property(b => b.Created)
+            modelBuilder.Entity<Item>()
+                .HasIndex(i => i.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<Item>()
+                .Property(i => i.Created)
+                .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<Price>()
+                .Property(p => p.Created)
+                .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.Created)
                 .HasDefaultValueSql("getdate()");
 
             base.OnModelCreating(modelBuilder);

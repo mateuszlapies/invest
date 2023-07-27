@@ -1,6 +1,19 @@
+using ElectronNET.API;
+using Raspberry.App.Database;
+using Raspberry.App.Database.Model;
+using Raspberry.App.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.WebHost.UseElectron(args);
+
+builder.Services.AddDbContext<DatabaseContext>();
+
+builder.Services.AddTransient<IDatabaseService<Item>>();
+builder.Services.AddTransient<IDatabaseService<Price>>();
+builder.Services.AddTransient<IDatabaseService<Order>>();
+builder.Services.AddTransient<IQueryByItem<Price>>();
+builder.Services.AddTransient<IQueryByItem<Order>>();
 
 builder.Services.AddControllersWithViews();
 
@@ -17,11 +30,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
 
 app.MapFallbackToFile("index.html"); ;
 
-app.Run();
+await app.StartAsync();
+
+await Electron.WindowManager.CreateWindowAsync();
+
+app.WaitForShutdown();
