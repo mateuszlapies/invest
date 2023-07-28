@@ -3,6 +3,7 @@ using Raspberry.App.Database.Model;
 using Raspberry.App.Database;
 using Raspberry.App.Services.Interfaces;
 using Raspberry.App.Services.Database;
+using ElectronNET.API.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,10 @@ app.MapFallbackToFile("index.html"); ;
 
 await app.StartAsync();
 
-await Electron.WindowManager.CreateWindowAsync();
+if (!app.Environment.IsDevelopment())
+{
+    var config = app.Configuration.GetSection("BrowserWindowOptions").Get<BrowserWindowOptions>();
+    await Electron.WindowManager.CreateWindowAsync(config);
+}
 
 app.WaitForShutdown();
