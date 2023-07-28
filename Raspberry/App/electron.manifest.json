@@ -3,14 +3,14 @@
   "splashscreen": {
     "imageFile": ""
   },
-  "name": "App",
-  "author": "",
-  "singleInstance": false,
+  "name": "Invest Web App",
+  "author": "Mateusz Lapies",
+  "singleInstance": true,
   "environment": "Production",
   "build": {
     "appId": "com.App.app",
     "productName": "App",
-    "copyright": "Copyright © 2020",
+    "copyright": "Copyright © 2023",
     "buildVersion": "1.0.0",
     "compression": "maximum",
     "directories": {

@@ -7,10 +7,10 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-    <SpaProxyServerUrl>https://localhost:44465</SpaProxyServerUrl>
+    <SpaProxyServerUrl>https://localhost:44460</SpaProxyServerUrl>
     <SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Raspberry.App</RootNamespace>
+	<RootNamespace>Raspberry.App</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ElectronNET.API" Version="23.6.1" />
@@ -21,9 +21,6 @@
     <Content Remove="$(SpaRoot)**" />
     <None Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\App.Services\App.Services.csproj" />
   </ItemGroup>
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
     <!-- Ensure Node.js is installed -->
@@ -48,6 +45,9 @@
       </ResolvedFileToPublish>
     </ItemGroup>
   </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\App.Services\App.Services.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
