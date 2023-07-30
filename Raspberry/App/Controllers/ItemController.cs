@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Raspberry.App.Database.Model;
+using Raspberry.App.Model.Database;
 using Raspberry.App.Services.Interfaces;
 
 namespace Raspberry.App.Controllers

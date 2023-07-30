@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Raspberry.App.Database;
-using Raspberry.App.Database.Model;
+using Raspberry.App.Model.Database;
 using Raspberry.App.Services.Interfaces;
 
 namespace Raspberry.App.Services.Database
 {
-    public class OrderService : IDatabaseService<Order>, IQueryByItem<Order>
+    public class OrderService : IDatabaseService<Order>, IQueryAllByItem<Order>
     {
         private readonly DatabaseContext context;
 
@@ -26,12 +26,11 @@ namespace Raspberry.App.Services.Database
             return context.Orders.SingleOrDefault(o => o.Id == id);
         }
 
-        public IList<Order> GetAllByItem(long id)
+        public IQueryable<Order> GetAllByItem(long id)
         {
             return context.Orders
                 .Include(p => p.Item)
-                .Where(p => p.Item.Id == id)
-                .ToList();
+                .Where(p => p.Item.Id == id);
         }
 
         public IList<Order> GetAll()

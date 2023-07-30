@@ -1,16 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Raspberry.App.Database;
-using Raspberry.App.Database.Model;
+using Raspberry.App.Model.Database;
 using Raspberry.App.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Raspberry.App.Services.Database
 {
-    public class PriceService : IDatabaseService<Price>, IQueryByItem<Price>
+    public class PriceService : IDatabaseService<Price>, IQueryAllByItem<Price>
     {
         private readonly DatabaseContext context;
 
@@ -31,12 +26,12 @@ namespace Raspberry.App.Services.Database
             return context.Prices.SingleOrDefault(p => p.Id == id);
         }
 
-        public IList<Price> GetAllByItem(long id)
+        public IQueryable<Price> GetAllByItem(long id)
         {
             return context.Prices
                 .Include(p => p.Item)
                 .Where(p => p.Item.Id == id)
-                .ToList();
+                .OrderByDescending(p => p.Timestamp);
         }
 
         public IList<Price> GetAll()

@@ -1,9 +1,10 @@
 using ElectronNET.API;
-using Raspberry.App.Database.Model;
+using ElectronNET.API.Entities;
 using Raspberry.App.Database;
 using Raspberry.App.Services.Interfaces;
 using Raspberry.App.Services.Database;
-using ElectronNET.API.Entities;
+using Raspberry.App.Model.Database;
+using Raspberry.App.Model.Services.Stats;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +20,12 @@ builder.Services.AddTransient<IDatabaseService<Item>, ItemService>();
 builder.Services.AddTransient<IDatabaseService<Price>, PriceService>();
 builder.Services.AddTransient<IDatabaseService<Order>, OrderService>();
 
-builder.Services.AddTransient<IQueryByItem<Price>, PriceService>();
-builder.Services.AddTransient<IQueryByItem<Order>, OrderService>();
+builder.Services.AddTransient<IQueryAllByItem<Price>, PriceService>();
+builder.Services.AddTransient<IQueryAllByItem<Order>, OrderService>();
+
+builder.Services.AddTransient<IQueryByItem<Stats>, StatsService>();
+
+builder.Services.AddTransient<IChartService, ChartService>();
 
 var app = builder.Build();
 

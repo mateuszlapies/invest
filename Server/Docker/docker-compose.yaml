@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_PASSWORD: postgres
+  migrations:
+    build:
+      context: ../App
+      target: migrations
+    depends_on:
+      - database
+  app:
+    build:
+      context: ../App
+      target: app
+    depends_on:
+      - database
+  proxy:
+    build:
+      context: ./proxy
+    ports:
+      - "443:443"
+    depends_on:
+      - app

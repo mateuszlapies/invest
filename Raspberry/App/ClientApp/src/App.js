@@ -1,18 +1,38 @@
-import React, { Component } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import AppRoutes from './AppRoutes';
+import React, {useEffect, useState} from 'react';
+import Layout from "./components/Layout";
+import Grid from "./components/Grid";
+import {Mobile} from "./components/Mobile";
 
-export default class App extends Component {
-  static displayName = App.name;
+import "./styles/App.css";
 
-  render() {
+export default function App() {
+  let [item, setItem] = useState(0);
+  let [items, setItems] = useState([]);
+  
+  useEffect(() => {
+    fetch("/api/Item")
+      .then(r => r.json())
+      .then(j => setItems(j))
+  }, []);
+  
+  useEffect(() => {
+    if (items) {
+      setInterval(() => {
+        setItem((item + 1) % items.length)
+      }, 3000)
+    }
+  }, [item, items])
+
+  if (items.length > 0) {
     return (
-      <Routes>
-          {AppRoutes.map((route, index) => {
-          const { element, ...rest } = route;
-          return <Route key={index} {...rest} element={element} />;
-          })}
-      </Routes>
+      <Layout>
+        <Grid item={items[item]} />
+      </Layout>
     );
+  } else {
+    return (
+      <Mobile/>
+    )
   }
+
 }

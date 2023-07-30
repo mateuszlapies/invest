@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Raspberry.App.Database.Model;
+using Raspberry.App.Model.Database;
 
 namespace Raspberry.App.Database
 {

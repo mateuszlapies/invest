@@ -4,7 +4,8 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^5.2.3",
-    "echarts": "^5.4.3",
+    "bootstrap-icons": "^1.10.5",
+    "echarts-for-react": "^3.0.2",
     "http-proxy-middleware": "^2.0.6",
     "jquery": "^3.6.3",
     "merge": "^2.1.1",
