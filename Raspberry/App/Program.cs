@@ -20,7 +20,7 @@ builder.WebHost.UseElectron(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddElectron();
-v
+
 builder.Services.AddDbContext<DatabaseContext>();
 
 builder.Services.AddTransient<IBluetoothIntegration, BluetoothIntegration>();
