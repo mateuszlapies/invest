@@ -47,4 +47,25 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="Plugin.BLE" Version="3.0.0-rc.1" />
+	  <PackageReference Include="ZXing.Net.Maui" Version="0.3.0-preview.1" />
+	  <PackageReference Include="ZXing.Net.Maui.Controls" Version="0.3.0-preview.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Pages\SetupBluetooth.xaml.cs">
+	    <DependentUpon>SetupBluetooth.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Pages\SetupBluetooth.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\SetupWifi.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
 </Project>

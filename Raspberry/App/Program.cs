@@ -1,20 +1,29 @@
 using ElectronNET.API;
-using ElectronNET.API.Entities;
 using Raspberry.App.Database;
 using Raspberry.App.Services.Interfaces;
 using Raspberry.App.Services.Database;
 using Raspberry.App.Model.Database;
 using Raspberry.App.Model.Services.Stats;
+using Raspberry.App.Integrations.Bluetooth;
+using ElectronNET.API.Entities;
+using Serilog;
+using Raspberry.App.Integrations.Bluetooth.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .WriteTo.Console()
+    .WriteTo.File("logs.txt"));
 
 builder.WebHost.UseElectron(args);
 
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddElectron();
-
+v
 builder.Services.AddDbContext<DatabaseContext>();
+
+builder.Services.AddTransient<IBluetoothIntegration, BluetoothIntegration>();
 
 builder.Services.AddTransient<IDatabaseService<Item>, ItemService>();
 builder.Services.AddTransient<IDatabaseService<Price>, PriceService>();
@@ -38,7 +47,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.MapFallbackToFile("index.html"); ;
+app.MapFallbackToFile("index.html");
 
 await app.StartAsync();
 

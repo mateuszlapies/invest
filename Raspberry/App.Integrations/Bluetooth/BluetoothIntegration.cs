@@ -1,23 +1,27 @@
-﻿using HashtagChris.DotNetBlueZ;
+﻿using Microsoft.Extensions.Logging;
+using Raspberry.App.Integrations.Bluetooth.Interfaces;
 
 namespace Raspberry.App.Integrations.Bluetooth
 {
-    public class BluetoothIntegration
+    public class BluetoothIntegration : IBluetoothIntegration
     {
-        public BluetoothIntegration()
+        private readonly ILogger logger;
+        private readonly IBluetoothAdapter adapter;
+
+        public BluetoothIntegration(ILogger logger)
         {
-            var adapters = BlueZManager.GetAdaptersAsync().GetAwaiter().GetResult();
-            foreach (var adapter in adapters)
-            {
-                adapter.PoweredOn += Adapter_PoweredOn;
-                adapter.SetPoweredAsync(true);
-            }
+            this.logger = logger;
+            adapter = new BluetoothAdapter(this.logger);
         }
 
-        private async Task Adapter_PoweredOn(Adapter adapter, BlueZEventArgs eventArgs)
+        public void InitializeAdapter()
         {
-            await adapter.SetAliasAsync("Invest");
-            await adapter.SetDiscoverableAsync(true);
+            adapter.Initialize();
+        }
+
+        public async Task<string> GetAdapterAddress()
+        {
+            return await adapter.GetAddress();
         }
     }
 }

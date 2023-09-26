@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Mobile.App.Pages.SetupWifi"
+             Title="Setup - Wifi">
+    <VerticalStackLayout>
+        <Entry x:Name="name"
+            ReturnType="Next"
+            Placeholder="Wifi Name"
+            IsSpellCheckEnabled="false"
+            IsTextPredictionEnabled="false"
+            TextChanged="OnWifiNameTextChanged" />
+        <Entry x:Name="pass"
+            ReturnType="Done"
+            IsPassword="True"
+            Placeholder="Wifi Password"
+            IsSpellCheckEnabled="false"
+            IsTextPredictionEnabled="false"
+            TextChanged="OnWifiPassTextChanged"/>
+        <Button
+            x:Name="SubmitButton"
+            Text="Submit"
+            SemanticProperties.Hint="Sends wifi details to the device"
+            Clicked="OnSetupClicked"
+            HorizontalOptions="Center" />
+    </VerticalStackLayout>
+</ContentPage>

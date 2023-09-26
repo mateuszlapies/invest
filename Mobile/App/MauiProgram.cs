@@ -1,16 +1,25 @@
-﻿namespace Mobile.App
+﻿using ZXing.Net.Maui;
+using ZXing.Net.Maui.Controls;
+
+namespace Mobile.App
 {
     public static class MauiProgram
     {
         public static MauiApp CreateMauiApp()
-        {
+        {          
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseBarcodeReader()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                }).ConfigureMauiHandlers(h =>
+                {
+                    h.AddHandler(typeof(CameraBarcodeReaderView), typeof(CameraBarcodeReaderViewHandler));
+                    h.AddHandler(typeof(CameraView), typeof(CameraViewHandler));
+                    h.AddHandler(typeof(BarcodeGeneratorView), typeof(BarcodeGeneratorViewHandler));
                 });
 
             return builder.Build();
