@@ -3,11 +3,18 @@
   "splashscreen": {
     "imageFile": ""
   },
-  "name": "Invest Web App",
+  "name": "cs2invest",
+  "description": "Desktop client app for CS 2 Invest",
   "author": "Mateusz Lapies",
   "singleInstance": true,
   "environment": "Production",
   "build": {
+	"target": "snap",
+	"base": "core22",
+	"plugs": [
+       "wayland",
+	   "network"
+	],
     "appId": "com.App.app",
     "productName": "App",
     "copyright": "Copyright © 2023",
